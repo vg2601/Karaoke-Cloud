@@ -1,10 +1,11 @@
 import yt_dlp
 import os
+import shutil
 import subprocess
 import syncedlyrics
 from audio_separator.separator import Separator
 
-# Auto-detect Colab vs Local
+# Drive Setup
 DRIVE_PATH = "/content/drive/MyDrive/KaraokeOutput"
 OUTPUT_DIR = DRIVE_PATH if os.path.exists("/content/drive") else "./output"
 
@@ -38,7 +39,9 @@ def process_track(url, semitones, separator):
         files = separator.separate("temp.mp3")
         inst_temp = next(f for f in files if "Instrumental" in f)
         final_inst = f"{OUTPUT_DIR}/{title}_Inst.mp3"
-        os.rename(inst_temp, final_inst)
+        
+        # --- FIX: Use shutil.move for Cross-Device Transfer ---
+        shutil.move(inst_temp, final_inst) 
 
         # 4. Pitch Shift
         if semitones != 0:
@@ -55,11 +58,10 @@ def process_track(url, semitones, separator):
 def main():
     if not os.path.exists(OUTPUT_DIR): os.makedirs(OUTPUT_DIR)
     
-    # 1. Get URL
     url = input("Paste YouTube Video or Playlist URL: ").strip()
     if not url: return
-    
-    # 2. Pitch Menu
+
+    # Menu
     print("\nSelect Output Key:")
     print("1. Original Key Only (0)")
     print("2. Male ➔ Female (+4)")
@@ -85,11 +87,9 @@ def main():
         info = ydl.extract_info(url, download=False)
         
         if 'entries' in info:
-            count = len(info['entries'])
-            print(f"📋 Playlist Detected: {count} tracks.")
-            print(f"🎤 Applying pitch shift ({semitones}) to ALL tracks.")
+            print(f"📋 Playlist Detected: {len(info['entries'])} tracks.")
             for i, entry in enumerate(info['entries']):
-                print(f"--- Track {i+1}/{count} ---")
+                print(f"--- Track {i+1}/{len(info['entries'])} ---")
                 process_track(entry['url'], semitones, sep)
         else:
             process_track(url, semitones, sep)
