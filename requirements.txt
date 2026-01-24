@@ -1,4 +1,5 @@
 streamlit
 yt-dlp
-audio-separator[cpu]
+audio-separator[gpu]
+
 syncedlyrics
