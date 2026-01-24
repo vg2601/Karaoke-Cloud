@@ -26,30 +26,44 @@ def process_track(url, semitones, separator):
         title = "Unknown"
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
-            title = "".join([c for c in info['title'] if c.isalnum() or c in (' ', '-')]).strip()
+            # Clean title but keep it readable
+            title = "".join([c for c in info['title'] if c.isalnum() or c in (' ', '-', '_')]).strip()
         
         print(f"\n🎵 Processing: {title}")
 
+        # --- FIX 1: Save Original Song ---
+        original_path = f"{OUTPUT_DIR}/{title}_Original.mp3"
+        shutil.copy("temp.mp3", original_path)
+        print(f"      💾 Saved Original MP3")
+
         # 2. Lyrics
-        lrc = syncedlyrics.search(title)
-        if lrc:
-            with open(f"{OUTPUT_DIR}/{title}.lrc", "w", encoding="utf-8") as f: f.write(lrc)
+        try:
+            lrc = syncedlyrics.search(title)
+            if lrc:
+                with open(f"{OUTPUT_DIR}/{title}.lrc", "w", encoding="utf-8") as f: f.write(lrc)
+                print(f"      📝 Lyrics saved")
+            else:
+                print(f"      ⚠️ No lyrics found for '{title}'")
+        except Exception as e:
+            print(f"      ⚠️ Lyrics Error: {e}")
 
         # 3. Separate
+        print(f"      🎻 Separating Vocals...")
         files = separator.separate("temp.mp3")
         inst_temp = next(f for f in files if "Instrumental" in f)
         final_inst = f"{OUTPUT_DIR}/{title}_Inst.mp3"
         
-        # --- FIX: Use shutil.move for Cross-Device Transfer ---
+        # Move Instrumental to Drive
         shutil.move(inst_temp, final_inst) 
 
         # 4. Pitch Shift
         if semitones != 0:
             apply_pitch_shift(final_inst, f"{OUTPUT_DIR}/{title}_Pitched.mp3", semitones)
+            print(f"      🎸 Pitched version created")
         
-        print(f"✅ Saved to Drive: {title}")
+        print(f"✅ COMPLETE: {title}")
 
-        # Cleanup
+        # Cleanup temp file
         if os.path.exists("temp.mp3"): os.remove("temp.mp3")
         
     except Exception as e:
@@ -61,7 +75,6 @@ def main():
     url = input("Paste YouTube Video or Playlist URL: ").strip()
     if not url: return
 
-    # Menu
     print("\nSelect Output Key:")
     print("1. Original Key Only (0)")
     print("2. Male ➔ Female (+4)")
@@ -81,7 +94,6 @@ def main():
     sep = Separator()
     sep.load_model(model_filename="UVR-MDX-NET-Inst_HQ_3.onnx")
 
-    # Playlist Logic
     ydl_list = {'extract_flat': True, 'quiet': True}
     with yt_dlp.YoutubeDL(ydl_list) as ydl:
         info = ydl.extract_info(url, download=False)
