@@ -1,12 +1,118 @@
-# 🎤 Karaoke-Cloud
+# ☁️ Karaoke-Cloud
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/YOUR_USERNAME/Karaoke-Cloud/blob/main/Start_Here.ipynb)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=flat&logo=python&logoColor=white)](https://www.python.org/)
 [![FFmpeg](https://img.shields.io/badge/FFmpeg-Required-green?style=flat&logo=ffmpeg&logoColor=white)](https://ffmpeg.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=flat)](https://opensource.org/licenses/MIT)
 
-A powerful, open-source automation tool that extracts **Instrumentals** and **Synced Lyrics** from online media playlists. It features AI-powered vocal separation and studio-quality pitch shifting.
+**Turn any audio link into a high-quality Karaoke Video with synchronized lyrics.**
 
-Designed to run **locally** or in the **cloud**, allowing you to process entire playlists and sync them directly to your phone or Smart TV.
+This tool uses AI to separate vocals from music, fetches synchronized lyrics, and generates a video file ready for your TV. All running for free on Google Colab's T4 GPU.
+
+---
+
+## 🚀 Quick Start (The Easy Way)
+
+1.  **Click the "Open in Colab" badge** above.
+2.  **Run Cell 1:** Initialize the system (Mounts Drive & Installs Universal Fonts).
+3.  **Run Cell 2:** Select **"Visual Dashboard"** or **"Command Line"** to process your songs.
+4.  **Run Cell 3 (Optional):** Batch convert existing audio files into Videos.
+
+---
+
+## 🔗 Supported Sources
+
+Unlike standard tools, Karaoke Cloud is **source agnostic**. You can paste links from:
+
+* **SoundCloud** (Great for covers & remixes)
+* **Internet Archive** (Public domain & classic recordings)
+* **Bandcamp** (Support independent artists directly)
+* **Mixcloud** (DJ Sets - *Instrumental extraction only*)
+* **Direct MP3/WAV Links**
+
+---
+
+## 🛠️ How It Works
+
+This project automates the entire pipeline from Source URL to TV-Ready Karaoke file.
+
+```mermaid
+graph TD
+    %% Input Stage
+    A[User Pastes URL] -->|Universal Downloader| B(Download Audio)
+    B --> C{Process Track}
+    
+    %% AI Processing
+    C -->|syncedlyrics| D[Fetch .LRC Lyrics]
+    C -->|UVR-MDX-Net| E[AI Vocal Separation]
+    
+    %% Audio Output
+    E --> F[Instrumental Track]
+    F -->|Optional| G[Pitch Shift]
+    
+    %% Video Generation
+    D & F & G --> H[FFmpeg Video Engine]
+    H -->|Burn Lyrics + Noto Sans Font| I[Final .MP4 Video]
+    
+    %% Storage
+    I -->|Save to| J[Google Drive /Karaoke_Videos_Final]
+    
+    %% Styling
+    classDef neonBlue fill:#0e1117,stroke:#00ffff,stroke-width:2px,color:#fff;
+    classDef neonGreen fill:#0e1117,stroke:#00ff00,stroke-width:2px,color:#fff;
+    classDef dark fill:#333,stroke:#fff,stroke-width:2px,color:#fff;
+
+    class A dark;
+    class B neonBlue;
+    class E,H neonGreen;
+    class I,J dark;
+```
+## ✨ Features
+
+* **⚡ 100% Free GPU Acceleration:** Processes a song in ~45 seconds (vs 30 mins on CPU).
+* **🌍 Multi-Language Support:** Automatically installs `Noto Sans` to render Hindi, Japanese, and Unicode lyrics correctly without "boxes".
+* **📺 TV-Ready Videos:** Automatically creates 1080p black-screen videos with **large, bright yellow lyrics** burned in (optimized for living room viewing).
+* **🎹 Pitch Shifter:** Change the key (Male ↔ Female) without affecting tempo.
+* **📊 Session Logging:** Creates a `.csv` report for every session, tracking which songs were processed successfully.
+
+---
+
+## 📂 Output Structure
+
+After running the tool, check your Google Drive for a folder named **`KaraokeOutput`**.
+
+| File / Folder | Description |
+| :--- | :--- |
+| **`/Karaoke_Videos_Final`** | **📺 COPY THIS TO YOUR USB.** Contains the ready-to-play MP4 videos. |
+| `SongName_Inst.mp3` | The isolated instrumental track. |
+| `SongName.lrc` | The synchronized lyrics file. |
+| `SongName_Original.mp3` | Backup of the original audio. |
+| `Report_Audio_TIMESTAMP.csv` | Log of all audio processing attempts. |
+| `Report_Video_TIMESTAMP.csv` | Log of all video generation attempts. |
+
+---
+
+## 💻 Manual Installation (Local Power Users)
+
+If you have a powerful NVIDIA GPU and want to run this locally instead of on Colab:
+
+1.  **Clone the repo:**
+    ```bash
+    git clone [https://github.com/YOUR_USERNAME/Karaoke-Cloud.git](https://github.com/YOUR_USERNAME/Karaoke-Cloud.git)
+    cd Karaoke-Cloud
+    ```
+
+2.  **Install Requirements:**
+    ```bash
+    pip install -r requirements.txt
+    pip install "audio-separator[gpu]"
+    ```
+    *(Note: You must have FFmpeg installed and added to your system PATH)*
+
+3.  **Run the CLI:**
+    ```bash
+    python cli.py
+    ```
 
 ---
 
@@ -20,122 +126,3 @@ Designed to run **locally** or in the **cloud**, allowing you to process entire 
 > * **"As Is":** This software is provided without warranty of any kind.
 
 ---
-
-## ⚡ How It Works
-
-```mermaid
-graph TD
-    %% Input Stage
-    A[User Input: Playlist/URL] --> B{Fetch Media}
-    B --> C(Download Audio Stream)
-
-    %% Parallel Processing
-    C --> D{Lyrics Search}
-    D -->|Found| E[Save .lrc File]
-    D -->|Not Found| F[Skip Lyrics]
-
-    C --> G(AI Separation: UVR-HQ3)
-    
-    %% Output Stage
-    G --> H[Isolate Instrumental]
-    
-    %% Pitch Logic
-    H --> I{Pitch Shift?}
-    I -->|Yes| J[FFmpeg Processing] --> K[Save Pitched .mp3]
-    I -->|No| L[Save Standard .mp3]
-
-    %% Final Sync
-    E --> M[Sync to Google Drive / Local]
-    K --> M
-    L --> M
-    
-    %% Styling
-    classDef neonBlue fill:#0e1117,stroke:#00ffff,stroke-width:2px,color:#fff;
-    classDef neonGreen fill:#0e1117,stroke:#00ff00,stroke-width:2px,color:#fff;
-    classDef dark fill:#333,stroke:#fff,stroke-width:2px,color:#fff;
-
-    class A dark;
-    class C neonBlue;
-    class G,I neonGreen;
-    class E,K,L dark;
-```
-## 🚀 Features
-
-* **Playlist Automation:** Processes single links or entire playlists in one go.
-* **AI Separation:** Uses the high-performance `UVR-MDX-NET-Inst_HQ_3` model for clean instrumental isolation.
-* **Vocal Pitch Shifting:** Change keys (Male ↔ Female) without altering the tempo.
-* **Synced Lyrics:** Automatically fetches `.lrc` files for karaoke display.
-* **Cloud Ready:** Optimized for Google Colab with direct Google Drive syncing.
-
----
-
-## ☁️ Quick Start: Cloud Mode (Phone Monitor)
-*No installation required. Runs on Google's servers, saves to your Drive.*
-
-1.  Open **[Google Colab](https://colab.research.google.com)**.
-2.  Create a new notebook and paste the following code into the first cell:
-    ```python
-    !git clone [YOUR_GITHUB_REPO_URL]
-    %cd Karaoke-Cloud
-    from google.colab import drive
-    drive.mount('/content/drive')
-    !apt-get install ffmpeg -y
-    !pip install -r requirements.txt
-    !python cli.py
-    ```
-3.  Run the cell.
-4.  Paste your **Media Playlist URL** when prompted.
-5.  **Monitor on Phone:** Open the **Google Drive App** on your phone and watch the `KaraokeOutput` folder populate with files automatically.
-
----
-
-## 💻 Local Installation (PC / Mac / Linux)
-
-### Prerequisites
-* **Python 3.10+**
-* **FFmpeg** (Must be installed and added to System PATH).
-
-### Setup
-1.  **Clone or Download** this repository.
-2.  Open your terminal/command prompt in the project folder.
-3.  Install dependencies:
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-### Usage
-**Option 1: Command Line (Fastest)**
-Best for batch processing playlists.
-```bash
-python cli.py
-```
-**Option 2: Visual Dashboard**
-Best for single track processing with a user interface.
-```bash
-streamlit run app.py
-```
-
-## 📺 How to Play on TV (Android TV / Smart TV)
-
-This tool generates standard karaoke files compatible with most players.
-
-1.  **Transfer Files:** Copy the generated `.mp3` (Audio) and `.lrc` (Lyrics) files to a USB drive or access them via a Cloud File Manager on your TV.
-2.  **Naming Rule:** Ensure both files have the **exact same filename**:
-    * `Track01_Instrumental.mp3`
-    * `Track01_Instrumental.lrc`
-3.  **Recommended Apps:**
-    * **VLC for Android:** automatically detects the lyrics file.
-    * **Kodi:** Supports advanced karaoke tagging.
-    * **ALSong:** Dedicated lyrics player.
-
----
-
-## 📂 Output Structure
-
-All processed files are organized as follows:
-
-| File Type | Suffix | Description |
-| :--- | :--- | :--- |
-| **Lyrics** | `.lrc` | Time-synced lyrics file. |
-| **Instrumental** | `_Inst.mp3` | The isolated instrumental track. |
-| **Pitched** | `_Pitched.mp3` | (Optional) Key-shifted version for vocal range adjustment. |
