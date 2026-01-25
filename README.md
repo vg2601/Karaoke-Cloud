@@ -1,6 +1,6 @@
 # ☁️ Karaoke-Cloud
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/YOUR_USERNAME/Karaoke-Cloud/blob/main/Start_Here.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/vg2601/Karaoke-Cloud/blob/main/Start_Here.ipynb)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=flat&logo=python&logoColor=white)](https://www.python.org/)
 [![FFmpeg](https://img.shields.io/badge/FFmpeg-Required-green?style=flat&logo=ffmpeg&logoColor=white)](https://ffmpeg.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=flat)](https://opensource.org/licenses/MIT)
@@ -118,5 +118,6 @@ If you have a powerful NVIDIA GPU and want to run this locally instead of on Col
 > * **"As Is":** This software is provided without warranty of any kind.
 
 ---
+
 
 
