@@ -14,9 +14,13 @@ This tool uses AI to separate vocals from music, fetches synchronized lyrics, an
 ## 🚀 Quick Start (The Easy Way)
 
 1.  **Click the "Open in Colab" badge** above.
-2.  **Run Cell 1:** Initialize the system (Mounts Drive & Installs Universal Fonts).
-3.  **Run Cell 2:** Process your songs (Download + Separate + Lyrics).
-4.  **Run Cell 3:** Batch convert your songs into **MP4 Videos** for your TV.
+2.  **IMPORTANT: Activate GPU**
+    * Go to the top menu: `Runtime` > `Change runtime type`
+    * Set **Hardware accelerator** to `T4 GPU`
+    * Click `Save`
+3.  **Run Cell 1:** Initialize the system (Mounts Drive & Installs Universal Fonts).
+4.  **Run Cell 2:** Process your songs (Download + Separate + Lyrics).
+5.  **Run Cell 3:** Batch convert your songs into **MP4 Videos** for your TV.
 
 ---
 
@@ -114,4 +118,5 @@ If you have a powerful NVIDIA GPU and want to run this locally instead of on Col
 > * **"As Is":** This software is provided without warranty of any kind.
 
 ---
+
 
