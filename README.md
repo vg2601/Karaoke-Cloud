@@ -1,9 +1,6 @@
 # ☁️ Karaoke-Cloud
 
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/YOUR_USERNAME/Karaoke-Cloud/blob/main/Start_Here.ipynb)
-[![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=flat&logo=python&logoColor=white)](https://www.python.org/)
-[![FFmpeg](https://img.shields.io/badge/FFmpeg-Required-green?style=flat&logo=ffmpeg&logoColor=white)](https://ffmpeg.org/)
-[![License](https://img.shields.io/badge/License-MIT-yellow?style=flat)](https://opensource.org/licenses/MIT)
 
 **Turn any audio link into a high-quality Karaoke Video with synchronized lyrics.**
 
@@ -15,8 +12,8 @@ This tool uses AI to separate vocals from music, fetches synchronized lyrics, an
 
 1.  **Click the "Open in Colab" badge** above.
 2.  **Run Cell 1:** Initialize the system (Mounts Drive & Installs Universal Fonts).
-3.  **Run Cell 2:** Select **"Visual Dashboard"** or **"Command Line"** to process your songs.
-4.  **Run Cell 3 (Optional):** Batch convert existing audio files into Videos.
+3.  **Run Cell 2:** Process your songs (Download + Separate + Lyrics).
+4.  **Run Cell 3:** Batch convert your songs into **MP4 Videos** for your TV.
 
 ---
 
@@ -33,8 +30,6 @@ Unlike standard tools, Karaoke Cloud is **source agnostic**. You can paste links
 ---
 
 ## 🛠️ How It Works
-
-This project automates the entire pipeline from Source URL to TV-Ready Karaoke file.
 
 ```mermaid
 graph TD
@@ -56,21 +51,11 @@ graph TD
     
     %% Storage
     I -->|Save to| J[Google Drive /Karaoke_Videos_Final]
-    
-    %% Styling
-    classDef neonBlue fill:#0e1117,stroke:#00ffff,stroke-width:2px,color:#fff;
-    classDef neonGreen fill:#0e1117,stroke:#00ff00,stroke-width:2px,color:#fff;
-    classDef dark fill:#333,stroke:#fff,stroke-width:2px,color:#fff;
-
-    class A dark;
-    class B neonBlue;
-    class E,H neonGreen;
-    class I,J dark;
 ```
 ## ✨ Features
 
 * **⚡ 100% Free GPU Acceleration:** Processes a song in ~45 seconds (vs 30 mins on CPU).
-* **🌍 Multi-Language Support:** Automatically installs `Noto Sans` to render Hindi, Japanese, and Unicode lyrics correctly without "boxes".
+* **🌍 Multi-Language Support:** Automatically installs `Noto Sans` to render Hindi, Japanese, and Unicode lyrics correctly on video.
 * **📺 TV-Ready Videos:** Automatically creates 1080p black-screen videos with **large, bright yellow lyrics** burned in (optimized for living room viewing).
 * **🎹 Pitch Shifter:** Change the key (Male ↔ Female) without affecting tempo.
 * **📊 Session Logging:** Creates a `.csv` report for every session, tracking which songs were processed successfully.
