@@ -13,25 +13,12 @@ OUTPUT_DIR = DRIVE_PATH if os.path.exists("/content/drive") else "./output"
 LOG_FILE = f"{OUTPUT_DIR}/Karaoke_Report.csv"
 
 def log_to_excel(title, pitch, lyrics_found, orig_path, inst_path, status="Success"):
-    """Appends the processing result to a CSV file (Opens in Excel)."""
     file_exists = os.path.isfile(LOG_FILE)
-    
     with open(LOG_FILE, mode='a', newline='', encoding='utf-8') as f:
         writer = csv.writer(f)
-        # Write Header if new file
         if not file_exists:
-            writer.writerow(["Date", "Song Title", "Status", "Pitch Change", "Lyrics Found", "Original File", "Instrumental File"])
-        
-        # Write Data
-        writer.writerow([
-            datetime.now().strftime("%Y-%m-%d %H:%M"),
-            title,
-            status,
-            f"{pitch} semitones",
-            "Yes" if lyrics_found else "No",
-            orig_path,
-            inst_path
-        ])
+            writer.writerow(["Date", "Song Title", "Status", "Pitch", "Lyrics Found", "Original File", "Instrumental File"])
+        writer.writerow([datetime.now().strftime("%Y-%m-%d %H:%M"), title, status, f"{pitch}", "Yes" if lyrics_found else "No", orig_path, inst_path])
 
 def apply_pitch_shift(input_file, output_file, semitones):
     if semitones == 0: return
@@ -41,6 +28,24 @@ def apply_pitch_shift(input_file, output_file, semitones):
            "-af", f"asetrate={new_rate},aresample=44100,atempo={1/factor:.4f}", output_file]
     subprocess.run(cmd)
 
+def get_lyrics(clean_title):
+    """Attempts to find lyrics, asks user for help if failed."""
+    print(f"      🔎 Searching lyrics for '{clean_title}'...")
+    try:
+        lrc = syncedlyrics.search(clean_title, enhanced=True)
+        if lrc: return lrc
+    except:
+        pass
+    
+    # If automatic search fails, ask user for manual input
+    print(f"      ⚠️ Automatic search failed for '{clean_title}'.")
+    print(f"      👉 Enter strict 'Artist - Song Name' manually (or press Enter to skip):")
+    manual_query = input("      > ").strip()
+    if manual_query:
+        print(f"      🔎 Retrying with '{manual_query}'...")
+        return syncedlyrics.search(manual_query, enhanced=True)
+    return None
+
 def process_track(url, semitones, separator):
     title = "Unknown"
     lyrics_found = False
@@ -48,39 +53,42 @@ def process_track(url, semitones, separator):
     original_path = "N/A"
     
     try:
-        # 1. Download
+        # 1. Download (Universal Configuration)
         ydl_opts = {
             'format': 'bestaudio/best', 
             'outtmpl': 'temp.%(ext)s', 
             'postprocessors': [{'key': 'FFmpegExtractAudio','preferredcodec': 'mp3'}], 
-            'quiet': True
+            'quiet': True,
+            # This 'User-Agent' line is the key to making SoundCloud/Archive.org work!
+            'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'nocheckcertificate': True,
         }
         
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
-            raw_title = info['title']
+            raw_title = info.get('title', 'Unknown Track')
+            
+            # Clean up filename
             title = "".join([c for c in raw_title if c.isalnum() or c in (' ', '-', '_')]).strip()
-            search_title = raw_title.replace("(Official Video)", "").replace("(Lyrics)", "").replace("(Official Audio)", "").strip()
+            
+            # Smart Title Cleaning for Lyrics Search
+            # Removes "Official Video", file extensions, and common junk
+            clean_title = raw_title.replace("(Official Video)", "").replace(".mp3", "").replace(".wav", "").replace("_", " ").strip()
         
         print(f"\n🎵 Processing: {title}")
 
         # Save Original
         original_path = f"{OUTPUT_DIR}/{title}_Original.mp3"
         shutil.copy("temp.mp3", original_path)
-        print(f"      💾 Saved Original MP3")
 
-        # 2. Lyrics
-        try:
-            print(f"      🔎 Searching for lyrics...")
-            lrc = syncedlyrics.search(search_title, enhanced=True)
-            if lrc:
-                with open(f"{OUTPUT_DIR}/{title}.lrc", "w", encoding="utf-8") as f: f.write(lrc)
-                lyrics_found = True
-                print(f"      📝 Lyrics saved.")
-            else:
-                print(f"      ⚠️ No synced lyrics found.")
-        except Exception as e:
-            print(f"      ⚠️ Lyrics Error: {e}")
+        # 2. Lyrics (With Manual Fallback)
+        lrc = get_lyrics(clean_title)
+        if lrc:
+            with open(f"{OUTPUT_DIR}/{title}.lrc", "w", encoding="utf-8") as f: f.write(lrc)
+            lyrics_found = True
+            print(f"      📝 Lyrics saved.")
+        else:
+            print(f"      ⚠️ No lyrics found.")
 
         # 3. Separate
         print(f"      🎻 Separating Instrumentals...")
@@ -92,57 +100,59 @@ def process_track(url, semitones, separator):
         # 4. Pitch Shift
         if semitones != 0:
             apply_pitch_shift(final_inst, f"{OUTPUT_DIR}/{title}_Pitched.mp3", semitones)
-            final_inst = f"{OUTPUT_DIR}/{title}_Pitched.mp3" # Update log to point to pitched version
+            final_inst = f"{OUTPUT_DIR}/{title}_Pitched.mp3"
             print(f"      🎸 Pitched version created.")
         
         print(f"✅ COMPLETE: {title}")
-        
-        # LOG SUCCESS
         log_to_excel(title, semitones, lyrics_found, original_path, final_inst, status="Success")
 
-        # Cleanup
         if os.path.exists("temp.mp3"): os.remove("temp.mp3")
         
     except Exception as e:
         print(f"❌ Error with {url}: {e}")
-        # LOG FAILURE
         log_to_excel(title, semitones, False, "N/A", "N/A", status=f"Error: {str(e)}")
 
 def main():
     if not os.path.exists(OUTPUT_DIR): os.makedirs(OUTPUT_DIR)
     
-    url = input("Paste YouTube Video or Playlist URL: ").strip()
+    print("\n🔗 Universal Downloader Ready")
+    print("   Supported: YouTube, SoundCloud, Bandcamp, Internet Archive, Mixcloud")
+    url = input("Paste URL: ").strip()
     if not url: return
 
-    print("\nSelect Output Key for ALL tracks:")
-    print("1. Original Key Only (0)")
+    print("\nSelect Output Key:")
+    print("1. Original Key (0)")
     print("2. Male ➔ Female (+4)")
     print("3. Female ➔ Male (-4)")
-    print("4. Custom Value")
     
-    choice = input("Enter choice (1-4): ").strip()
-    
-    semitones = 0
-    if choice == "2": semitones = 4
-    elif choice == "3": semitones = -4
-    elif choice == "4":
-        try: semitones = int(input("Enter custom semitones: "))
-        except: semitones = 0
+    choice = input("Enter choice (1-3): ").strip()
+    semitones = 4 if choice == "2" else -4 if choice == "3" else 0
 
-    print("🚀 Initializing AI Model (UVR-HQ3)...")
+    print("🚀 Initializing AI Model...")
     sep = Separator()
     sep.load_model(model_filename="UVR-MDX-NET-Inst_HQ_3.onnx")
 
-    ydl_list = {'extract_flat': True, 'quiet': True}
+    # Universal Playlist Logic
+    ydl_list = {
+        'extract_flat': True, 
+        'quiet': True,
+        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    }
+    
     with yt_dlp.YoutubeDL(ydl_list) as ydl:
-        info = ydl.extract_info(url, download=False)
-        
-        if 'entries' in info:
-            print(f"📋 Playlist Detected: {len(info['entries'])} tracks.")
-            for i, entry in enumerate(info['entries']):
-                print(f"--- Track {i+1}/{len(info['entries'])} ---")
-                process_track(entry['url'], semitones, sep)
-        else:
+        try:
+            info = ydl.extract_info(url, download=False)
+            
+            # Check if it's a playlist (works for SoundCloud sets too)
+            if 'entries' in info:
+                print(f"📋 Collection Detected: {len(info['entries'])} tracks.")
+                for entry in info['entries']:
+                    if entry: # Sometimes entries are None
+                        process_track(entry['url'], semitones, sep)
+            else:
+                process_track(url, semitones, sep)
+        except Exception as e:
+            # Fallback for direct file links (like Archive.org mp3 links)
             process_track(url, semitones, sep)
 
 if __name__ == "__main__": main()
