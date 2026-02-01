@@ -256,8 +256,7 @@ def main():
 
     print("🚀 Initializing AI Engine...")
     sep = Separator()
-    sep.load_model(model_filename="UVR-MDX-NET-Inst_HQ_3.onnx")
-
+    sep.load_model(model_filename="UVR_MDXNET_KARA_2.onnx")
     dl_list_opts = {'extract_flat': True, 'quiet': True, 'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
     
     with universal_dl.YoutubeDL(dl_list_opts) as downloader:
@@ -271,5 +270,6 @@ def main():
                 process_track(url, semitones, sep, generate_video)
         except:
             process_track(url, semitones, sep, generate_video)
+
 
 if __name__ == "__main__": main()
