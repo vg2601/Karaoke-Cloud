@@ -183,7 +183,7 @@ def process_track(url, semitones, separator, generate_video):
     title = "Unknown"
     lyrics_found = False
     try:
-        dl_opts = { 'cookiefile': 'cookies.txt', 'format': 'bestaudio/best', 'outtmpl': 'temp.%(ext)s', 'postprocessors': [{'key': 'FFmpegExtractAudio','preferredcodec': 'mp3'}], 'quiet': True, 'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36', 'nocheckcertificate': True}
+        dl_opts = { 'cookiefile': '/content/drive/MyDrive/cookies.txt', 'format': 'bestaudio/best', 'outtmpl': 'temp.%(ext)s', 'postprocessors': [{'key': 'FFmpegExtractAudio','preferredcodec': 'mp3'}], 'quiet': True, 'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36', 'nocheckcertificate': True}
         
         with universal_dl.YoutubeDL(dl_opts) as downloader:
             info = downloader.extract_info(url, download=True)
@@ -257,7 +257,7 @@ def main():
     print("🚀 Initializing AI Engine...")
     sep = Separator()
     sep.load_model(model_filename="UVR_MDXNET_KARA_2.onnx")
-    dl_list_opts = {'cookiefile': 'cookies.txt','extract_flat': True, 'quiet': True, 'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
+    dl_list_opts = {'cookiefile': '/content/drive/MyDrive/cookies.txt','extract_flat': True, 'quiet': True, 'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
     
     with universal_dl.YoutubeDL(dl_list_opts) as downloader:
         try:
@@ -273,4 +273,5 @@ def main():
 
 
 if __name__ == "__main__": main()
+
 
